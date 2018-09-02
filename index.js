@@ -69,10 +69,97 @@ io.on('connection', function(socket) {
         itunesCountry: 'us', // defaults to 'us'
         youtubeAPIKey: config.youtubeApi,
       }, function(err, songs) {
+        for(var i in songs) {
+          checkSong(songs[i]);
+        }
         socket.emit("ProfileData",profile);
         socket.emit("SongSearch", songs);
       });
 
+    });
+  });
+
+  socket.on('Vote', function(key, songID) {
+    LoginDB.findOne({key: key}).then(function (profile) { 
+      if(profile == null) {
+        socket.emit("Redirect", "landing.html","Woah there, you need to login again (not your fault payton made a bad app)");
+      }
+      SongDB.findOne({youtubeId: songID}).then(function(song) {
+        if(song == null) {
+          socket.emit("Error","This song doesn't exist for some reason. If you see this please contact Payton lol");
+          return;
+        }
+        else {
+          if(profile.pickedsongs.includes(song.youtubeId)) {
+
+          }
+          else {
+            profile.pickedsongs.push(song.youtubeId);
+            profile.numpickedsongs += 1;
+          }
+
+          if(song.votes.includes(profile.key)) {
+
+          }
+          else {
+            song.votes.push(profile.key);
+            song.voteAmount += 1;
+          }
+
+          SongDB.update({youtubeId:song.youtubeId},song);
+          LoginDB.update({key:profile.key},profile);
+        }
+
+      });
+
+  
+    });
+  });
+
+  
+  socket.on('UnVote', function(key, songID) {
+    LoginDB.findOne({key: key}).then(function (profile) { 
+      if(profile == null) {
+        socket.emit("Redirect", "landing.html","Woah there, you need to login again (not your fault payton made a bad app)");
+        return;
+      }
+      SongDB.findOne({youtubeId: songID}).then(function(song) {
+        if(song == null) {
+          socket.emit("Error","This song doesn't exist for some reason. If you see this please contact Payton lol");
+          return;
+        }
+        else {
+          if(!profile.pickedsongs.includes(song.youtubeId)) {
+
+          }
+          else {
+            for(var i = 0; i < profile.pickedsongs.length; i++) {
+              if(profile.pickedsongs[i] == song.youtubeId) {
+                profile.pickedsongs.splice(i,1);
+                profile.numpickedsongs -= 1;
+              } 
+            }
+          }
+
+          if(!song.votes.includes(profile.key)) {
+
+          }
+          else {
+            for(var i = 0; i < song.votes.length; i++) {
+              if(song.votes[i] == profile.key) {
+                song.votes.splice(i,1);
+                song.voteAmount -= 1;
+              } 
+            }
+          }
+
+          SongDB.update({youtubeId:song.youtubeId},song);
+          LoginDB.update({key:profile.key},profile);
+        }
+
+      });
+
+  
     });
   });
 
@@ -314,7 +401,6 @@ function checkSong(song) {
     title: song.title,
     artist: song.artist,
     album: song.album,
-    genre: song.genre,
     coverUrl: song.coverUrl,
     youtubeId: song.youtubeId,
     voteAmount: 0,
