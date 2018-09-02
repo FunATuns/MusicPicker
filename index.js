@@ -5,6 +5,8 @@ var port = debug ? 7777 : 27016;
 
 var express = require('express');
 var bodyParser = require('body-parser');
+
+var config = require('./config.json')
 var multer = require('multer');
 var app = express();
 var server = require('http').createServer(app);
@@ -65,7 +67,7 @@ io.on('connection', function(socket) {
         search: search,
         limit: 7, // defaults to 50
         itunesCountry: 'us', // defaults to 'us'
-        youtubeAPIKey: '',
+        youtubeAPIKey: config.youtubeApi,
       }, function(err, songs) {
         socket.emit("ProfileData",profile);
         socket.emit("SongSearch", songs);
