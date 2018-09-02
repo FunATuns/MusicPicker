@@ -6,7 +6,7 @@ var port = debug ? 7777 : 27016;
 var express = require('express');
 var bodyParser = require('body-parser');
 
-var config = require('./config.json')
+var config = require('./config.json');
 var multer = require('multer');
 var app = express();
 var server = require('http').createServer(app);
