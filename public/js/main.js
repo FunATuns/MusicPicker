@@ -54,12 +54,15 @@ socket.on("SongSearch",function (data) {
 function renderSongs( ) {
   var renderText = "";
   for(var i = 0; i < songsToLoad.length; i++) {
-    //if(myProfile.pickedsongs.includes(song.youtubeId)) {
-
-    //}
+    
     var song = songsToLoad[i];
     if(song.title && song.artist && song.youtubeId && song.coverUrl) {
-      renderText += "<div class='song' id='" + song.youtubeId + "'><div class='abcover' style='background-image:url(\"" + song.coverUrl + "\")'><div class='graycov'></div></div><p>" + song.title + " by " + song.artist + "</p></div>";
+      if(myProfile.pickedsongs.includes(song.youtubeId)) {
+        renderText += "<div class='song' id='" + song.youtubeId + "'><div class='abcover' style='background-image:url(\"" + song.coverUrl + "\")'><div class='graycov'></div></div><p>" + song.title + " by " + song.artist + "</p><div class='iconCnt' onclick='undoPick(\"" + song.youtubeId + "\")'><i class='fa fa-check' aria-hidden='true'></i></div></div>";
+      }
+      else {
+        renderText += "<div class='song' id='" + song.youtubeId + "'><div class='abcover' style='background-image:url(\"" + song.coverUrl + "\")'><div class='graycov'></div></div><p>" + song.title + " by " + song.artist + "</p><div class='iconCnt' onclick='songPick(\"" + song.youtubeId + "\")'><i class='fa fa-thumbs-up' aria-hidden='true'></i></div></div>";
+      }
     }
   }
   document.getElementById("songsWrapper").innerHTML = renderText;
@@ -97,107 +100,15 @@ function register() {
   }
 }
 
-function linkFix() {
-  for(var i=0;i<a.length;i++){
-    a[i].onclick=function(){
-      window.location=this.getAttribute("href");
-      return false;
-    }
-  }
+function songPick(songID){
+  socket.emit("Vote", localStorage.getItem("key"), songID);
 }
 
-
-//username, admin, points, hasPoints, lastPointTime, email
-
-socket.on("Profile", function(inf) {
- 
-  if(document.getElementById("prof") != null && document.getElementById("prof") != undefined){
-    document.getElementById("userPlace").innerHTML = inf.profile.username;
-    document.getElementById("ptsholder").innerHTML = inf.profile.scores.overall;
-    document.getElementById("bio").innerHTML = inf.profile.bio;
-    document.getElementById("prec").setAttribute("src", getAvatarURL(inf.profile.username));
-    var finalCat = [];
-      for(i = 0; categories.length > i; i++) {
-        if(inf.profile.scores[categories[i]]) {
-          inf.profile.scores[categories[i]].type = categories[i];
-          finalCat.push(inf.profile.scores[categories[i]]);
-        }
-      }
-      makeTiles(finalCat);
-    if(getParameterByName("username") == undefined || getParameterByName("username") == null) {
-      document.getElementById("editProf").innerHTML = "edit";
-      localStorage.setItem("username", inf.profile.username);
-    }
-  }  
-  else if(document.getElementById("profpic") != null && document.getElementById("profpic") != undefined){
-    document.getElementById("picupload").setAttribute("name", localStorage.getItem("key"));
-    myProfile = inf.profile;
-    document.getElementById("edprf").setAttribute("src", getAvatarURL(inf.profile.username));
-  }
-  else if(document.getElementById("uploadbox") != null  ){
-    document.getElementById("uploadboxupload").setAttribute("name",pageCategory + " " + localStorage.getItem("key"));
-    myProfile = inf.profile;
-  }
-});
-
-function getParameterByName(name, url) { 
-  if (!url)  
-    url = window.location.href; 
-  name = name.replace(/[\[\]]/g, "\\$&");
-  var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url); 
-  if (!results) 
-    return null; 
-  if (!results[2]) 
-    return ''; 
-  return decodeURIComponent(results[2].replace(/\+/g, " ")); 
+function undoPick(songID){
+  socket.emit("UnVote", localStorage.getItem("key"), songID);
 }
 
-$("#picupload").change(function(){
-  document.getElementById("sendProf").style.backgroundColor = "#4B1B1E";
-  document.getElementById("sendProf").style.display = "block";
+socket.on("Voted", function(data){
+  myProfile = data;
+  renderSongs();
 });
-
-$("#uploadboxupload").change(function(){
-  document.getElementById("uploadboxlabel").style.opacity = "0";
-  setTimeout(function(){
-    document.getElementById("uploadboxlabel").style.display = "none";
-    document.getElementById("uploadboxsubmit").style.display = "block";
-    document.getElementById("uploadboxcancel").style.display = "block";
-    
-    setTimeout(function(){
-      document.getElementById("uploadboxsubmit").style.opacity = "1";
-      document.getElementById("uploadboxcancel").style.opacity = "1";
-    }, 100);
-    
-  }, 1000);
-  
-});
-
-$("#uploadboxcancel").click(function(){
-  document.getElementById("uploadboxlabel").style.display = "block";
-  document.getElementById("uploadboxsubmit").style.display = "none";
-  document.getElementById("uploadboxcancel").style.display = "none";
-});
-
-$("#lowerright").click(function(event){
-  window.location = "leaderboard.html";
-});
-
-function makeTiles(finalCategories){
-  document.getElementById("catTiles").innerHTML = "";
-  for(i = 0; finalCategories.length> i; i++){
-    document.getElementById("catTiles").innerHTML += "<div id='" + finalCategories[i].type + "tile' class='catTile'>" + finalCategories[i].type.charAt(0).toUpperCase() + finalCategories[i].type.slice(1) + "<p class='tileScore'>" + finalCategories[i].score + "</p></div>";
-    if((i+1)%2 == 0) {
-      document.getElementById("catTiles").innerHTML += "<br>";
-    }
-  }
-}
-
-function updateBio(){
-  socket.emit("UpdateBio", localStorage.getItem("key"), document.getElementById("newBio").value);
-  document.getElementById("newBio").setAttribute("placeholder", "Bio updated!");
-  document.getElementById("newBio").value = "";
-  setTimeout(function(){
-    document.getElementById("newBio").setAttribute("placeholder", "Enter your new bio here...");
-  }, 3000);
-}

@@ -231,3 +231,16 @@ footer p {
   padding: 20px 40px;
   line-height: 50px;
 }
+
+.iconCnt {
+  display: flex;
+  position: absolute;
+  right: 30px;
+  height: 100%;
+  top:0;
+}
+
+.iconCnt i {
+  margin: auto auto;
+  font-size: 70px;
+}
