@@ -4,6 +4,8 @@ var pointss;
 var myProfile = {};
 var songsToLoad = null;
 //pay ip: 141.126.155.58:7777
+sessionStorage.setItem("adminlog", false);
+var unaccepted = [];
 
 var ua = navigator.userAgent.toLowerCase(); 
 if (ua.indexOf('safari') != -1) { 
@@ -120,4 +122,52 @@ socket.on("Voted", function(data){
 function mySongs(){
   document.getElementById("songsWrapper").innerHTML = "<div class='loader'>"
   socket.emit("GetLiked", localStorage.getItem("key"));
+}
+
+function logAd(){
+  var userpass = document.getElementById("adpass").value;
+  if(userpass == "shithead14"){
+    sessionStorage.setItem("adminlog", true);
+    document.getElementById("adOverlay").style.display = "none";
+    document.getElementById("hidad").style.display = "block";
+  }
+}
+
+function getUnapproved(){
+  if(sessionStorage.getItem("adminlog")){
+    socket.emit("GetUnapproved");
+  }
+  else {
+    alert("Missing valid admin key! Sending you to the login...");
+    setTimeout(function(){
+      document.getElementById("adOverlay").style.display = "block";
+      document.getElementById("adOverlay").style.display = "none";
+    },1000);
+  }
+}
+
+socket.on("Gotem", function(users){
+  document.getElementById("userSpot").innerHTML = "";
+  for(i = 0; users.length > i; i++) {
+    document.getElementById("userSpot").innerHTML += "<div class='userContainer'><div class='likecnt' onclick='accUser(\"" + users[i].key + "\")'><i class='fa fa-thumbs-up' aria-hidden='true'></i></div><p class='adusername'>" + users[i].name + "</p><div class='dislikecnt' onclick='delUser(\"" + users[i].key + "\")'><i class='fa fa-thumbs-down' aria-hidden='true'></i></div></div>"
+  }
+  var elem = document.getElementById("userSpot");
+  if (elem.offsetHeight < elem.scrollHeight) {
+    elem.style.webkitBoxShadow = "inset 0px -50px 25px -28px rgba(0,0,0,0.90)";
+    elem.style.mozBoxShadow = "inset 0px -50px 25px -28px rgba(0,0,0,0.90)";
+    elem.style.boxShadow = "inset 0px -50px 25px -28px rgba(0,0,0,0.90)";
+  }
+  else {
+    elem.style.webkitBoxShadow = "0";
+    elem.style.mozBoxShadow = "0";
+    elem.style.boxShadow = "0";
+  }
+});
+
+function accUser(id){
+  socket.emit("Approve", id);
+}
+
+function delUser(id){
+  socket.emit("Disapprove", id);
 }
