@@ -62,7 +62,7 @@ function renderSongs( ) {
         renderText += "<div class='song' id='" + song.youtubeId + "'><div class='abcover' style='background-image:url(\"" + song.coverUrl + "\")'><div class='graycov'></div></div><p>" + song.title + " by " + song.artist + "</p><div class='iconCnt' onclick='undoPick(\"" + song.youtubeId + "\")'><i class='fa fa-check' aria-hidden='true'></i></div></div>";
       }
       else {
-        renderText += "<div class='song' id='" + song.youtubeId + "'><div class='abcover' style='background-image:url(\"" + song.coverUrl + "\")'><div class='graycov'></div></div><p>" + song.title + " by " + song.artist + "</p><div class='iconCnt' onclick='songPick(\"" + song.youtubeId + "\")'><i class='fa fa-thumbs-up' aria-hidden='true'></i></div></div>";
+        renderText += "<div class='song' id='" + song.youtubeId + "'><div class='abcover' style='background-image:url(\"" + song.coverUrl + "\")'><div class='graycov'></div></div><p>" + song.title + " by " + song.artist + "</p><div class='iconCnt' id='l" + song.youtubeId + "' onclick='songPick(\"" + song.youtubeId + "\")'><i class='fa fa-thumbs-up' aria-hidden='true'></i></div></div>";
       }
     }
   }
@@ -107,7 +107,14 @@ function register() {
 }
 
 function songPick(songID){
+  document.getElementById("l" + songID).innerHTML = "<div class='songcirc'></div>"
   socket.emit("Vote", localStorage.getItem("key"), songID);
+  setTimeout(function(){
+    document.getElementById("l" + songID).innerHTML = "<section class='container'><figure class='chart' data-percent='100'><i class='fa fa-check incirc' id='circ" + songID + "' aria-hidden='true'></i><svg width='200' height='200' style='transform: scale(.65); margin-top: -95px; position: absolute; right: -50px;'><circle class='outer' cx='95' cy='95' r='85' transform='rotate(-90, 95, 95)'/></svg></figure></section>";
+    setTimeout(function(){
+      document.getElementById("circ" + songID).style.opacity = "1";
+    },750);
+  },700);
 }
 
 function undoPick(songID){
@@ -116,11 +123,11 @@ function undoPick(songID){
 
 socket.on("Voted", function(data){
   myProfile = data;
-  renderSongs();
+  //renderSongs();
 });
 
 function mySongs(){
-  document.getElementById("songsWrapper").innerHTML = "<div class='loader'>"
+  document.getElementById("songsWrapper").innerHTML = "<div class='loader'></div>"
   socket.emit("GetLiked", localStorage.getItem("key"));
 }
 
