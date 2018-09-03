@@ -33,9 +33,7 @@ footer, header, hgroup, menu, nav, section {
 }
 body {
   line-height: 1;
-  background: #4286f4;
   font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
-  color: white;
 }
 ol, ul {
 	list-style: none;
@@ -49,104 +47,187 @@ q:before, q:after {
 	content: none;
 }
 
-header {
-  text-align: center;
-  width: 100%;
-  font-size: 90px;
-  margin-top: 130px;
-  margin-bottom: 50px;
-}
-
 .landingPick {
-  width: 60%;
-  margin-left: calc(20% - 30px);
-  padding: 30px;
-  margin-top: 90px;
-  font-size: 50px;
-  text-align: center;
-  border-style: solid;
-  border-width: 5px;
-  border-color: white;
+  font-size: 60px;
+  cursor: pointer;
+  background-color: #283044;
+  color: white;
+  width: 100%;
+  display: block;
+  height: calc(50vh - 2px);
+  border-bottom: 1px solid white;
 }
 
-#loginHead {
-  text-align: center;
+#bkgimg {
+  background-image: url("../images/hoco.JPG");
+  background-size: cover;
+  background-repeat: none;
   width: 100%;
-  font-size: 90px;
-  margin-top: 50px;
-  margin-bottom: 50px;
+  height: 100vh;
+  display: block;
+  position: absolute;
+  opacity: .25;
+  top: 0;
+  left: 0;
+}
+
+.landingPick p {
+  text-align: center;
+  line-height: 80px;
+  position: absolute;
+  margin-top: 220px;
+  padding: 0 100px;
+}
+
+body {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+#registerPick {
+  border-bottom: 1px solid white;
+}
+
+#landhead {
+  background-color: #283044;
+  width: 100%;
+  font-size: 60px;
+  text-align: center;
+  padding: 40px 0;
+  color: white;
+  text-transform: uppercase;
+}
+
+h2 {
+  background-color: #283044;
+  width: 100%;
+  font-size: 40px;
+  text-align: center;
+  padding-bottom: 40px;
+  margin-top: -30px;
+  color: white;
+  text-transform: uppercase;
+}
+
+
+main input[type="text"], main input[type="password"]{
+  width: 80%;
+  display: block;
+  background-color: #f8f8f8;
+  margin: 50px auto;
+  font-size: 34px;
+  -webkit-appearance: none;
+  border: 1px solid #b6b6b6;
+  border-radius: 10px;
+  padding: 20px 40px;
+}
+
+#regMain, #logMain {
+  margin-top: 80px;
 }
 
 input::placeholder {
+  -webkit-appearance: none;
+  color: #b6b6b6;
+}
+
+#regButton, #logButton, #songSearchButton {
+  background-color: #283044;
+  padding: 30px 60px;
   color: white;
-}
-
-hr {
-  margin-bottom: 40px;
-}
-
-.initialInput {
-  width: 60%;
-  font-size: 75px;
-  padding: 30px;
-  margin-left: calc(20% - 30px);
-  background-color: #4286f4;
-  color: white;
-  border-style: solid;
-  border-width: 5px;
-  border-color: white;
-  display: block;
-  margin-bottom: 40px;
-}
-
-#logButton {
-  width: 60%;
-  font-size: 75px;
-  padding: 30px;
+  text-transform: uppercase;
+  font-size: 34px;
+  width: 76%;
+  display: table;
+  margin: 80px auto;
+  border-radius: 10px;
   text-align: center;
-  margin-left: calc(20% - 30px);
-  background-color: white;
-  color: #4286f4;
-  border-style: solid;
-  border-width: 5px;
-  border-color: white;
-  display: block;
-}
-
-#regButton {
-  width: 60%;
-  font-size: 75px;
-  padding: 30px;
-  text-align: center;
-  margin-left: calc(20% - 30px);
-  background-color: white;
-  color: #4286f4;
-  border-style: solid;
-  border-width: 5px;
-  border-color: white;
-  display: block;
 }
 
 #songSearchButton {
-  width: 60%;
-  font-size: 75px;
-  padding: 30px;
-  text-align: center;
-  margin-left: calc(20% - 30px);
-  background-color: white;
-  color: #4286f4;
-  border-style: solid;
-  border-width: 5px;
-  border-color: white;
-  display: block;
-}
-
-#songWrapper {
-  width: 100%;
-
+  margin: 50px auto;
 }
 
 .song {
   width: 100%;
-  
+  display: block;
+  color: white;
+  position: relative;
+}
+
+#songsWrapper {
+  height: 50vh; 
+  overflow-y: scroll; /* adds scrollbar */
+}
+
+.abcover {
+  width: 100%;
+  display: block;
+  position: absolute;
+  height: 100%;
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+.graycov {
+  background-color: #000000;
+  width: 100%;
+  display: block;
+  position: absolute;
+  height: 100%;
+  z-index: 1;
+  opacity: .3;
+}
+
+.song p {
+  padding:60px 80px;
+  padding-right: 140px;
+  z-index: 2;
+  font-size: 50px;
+}
+
+.loader {
+  border: 15px solid #FFFFFF;
+  border-radius: 50%;
+  border-top: 15px solid #283044;
+  width: 100px;
+  height: 100px;
+  -webkit-animation: spin .75s linear infinite;
+  animation: spin .75s linear infinite;
+  display: inline-block;
+  display: block;
+  position: relative;
+  margin: 30px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display:block;
+  background-color: #283044;
+  color: white;
+}
+
+footer img {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 120px;
+}
+
+footer p {
+  font-size: 30px;
+  padding: 20px 40px;
+  line-height: 50px;
 }

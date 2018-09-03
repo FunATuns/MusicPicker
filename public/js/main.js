@@ -1,14 +1,27 @@
-var ip = "192.168.1.114:7777";
+var ip = "http://68.234.71.226:7777";
 var socket = io.connect(ip); // take your ip out for saftey when pushing
 var pointss;
 var myProfile = {};
 var songsToLoad = null;
-var categories = ["general", "selfie", "meme"];
 //pay ip: 141.126.155.58:7777
+
+var ua = navigator.userAgent.toLowerCase(); 
+if (ua.indexOf('safari') != -1) { 
+  if (ua.indexOf('chrome') > -1) {
+    //alert("1") // Chrome
+  } else {
+    var landingPic = document.getElementsByClassName("landingPick");
+    for(i = 0; landingPic.length > i; i++) {
+      landingPic[i].style.height = "calc(50vh - 92px)";
+    }
+  }
+}
+
 
 $("#registerPick").click(function (e) {
   window.location = "register.html";
 });
+
 
 $("#loginPick").click(function (e) {
   window.location = "login.html";
@@ -34,19 +47,32 @@ socket.on("ProfileData",function (data) {
 
 socket.on("SongSearch",function (data) {
   songsToLoad = data;
+  console.log(data);
   renderSongs();
 });
 
 function renderSongs( ) {
   var renderText = "";
   for(var i = 0; i < songsToLoad.length; i++) {
+    //if(myProfile.pickedsongs.includes(song.youtubeId)) {
+
+    //}
     var song = songsToLoad[i];
-    renderText += "<div class='song'>" + song.title + " by " + song.artist + "</div>";
+    if(song.title && song.artist && song.youtubeId && song.coverUrl) {
+      renderText += "<div class='song' id='" + song.youtubeId + "'><div class='abcover' style='background-image:url(\"" + song.coverUrl + "\")'><div class='graycov'></div></div><p>" + song.title + " by " + song.artist + "</p></div>";
+    }
   }
   document.getElementById("songsWrapper").innerHTML = renderText;
+  var elem = document.getElementById("songsWrapper");
+  if (elem.offsetHeight < elem.scrollHeight) {
+    elem.style.webkitBoxShadow = "inset 0px -50px 25px -28px rgba(0,0,0,0.90)";
+    elem.style.mozBoxShadow = "inset 0px -50px 25px -28px rgba(0,0,0,0.90)";
+    elem.style.boxShadow = "inset 0px -50px 25px -28px rgba(0,0,0,0.90)";
+  }
 }
 
 function search() {
+  document.getElementById("songsWrapper").innerHTML = "<div class='loader'>"
   var key = localStorage.getItem("key");
   var search = document.getElementById("songSearch").value;
 
@@ -175,7 +201,3 @@ function updateBio(){
     document.getElementById("newBio").setAttribute("placeholder", "Enter your new bio here...");
   }, 3000);
 }
-
-$("#edtbackarrow").onclick(function(){
-  window.location = "profile.html?user=" + localstorage.getItem('username');
-});
