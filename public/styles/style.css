@@ -134,7 +134,7 @@ input::placeholder {
   color: #b6b6b6;
 }
 
-#regButton, #logButton, #songSearchButton {
+#regButton, #logButton, #songSearchButton, #mySongsBtn {
   background-color: #283044;
   padding: 30px 60px;
   color: white;
@@ -159,7 +159,7 @@ input::placeholder {
 }
 
 #songsWrapper {
-  height: 50vh; 
+  height: 40vh; 
   overflow-y: scroll; /* adds scrollbar */
 }
 

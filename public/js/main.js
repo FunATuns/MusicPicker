@@ -54,9 +54,8 @@ socket.on("SongSearch",function (data) {
 function renderSongs( ) {
   var renderText = "";
   for(var i = 0; i < songsToLoad.length; i++) {
-    
     var song = songsToLoad[i];
-    if(song.title && song.artist && song.youtubeId && song.coverUrl) {
+    if(song.title && song.artist && song.youtubeId) {
       if(myProfile.pickedsongs.includes(song.youtubeId)) {
         renderText += "<div class='song' id='" + song.youtubeId + "'><div class='abcover' style='background-image:url(\"" + song.coverUrl + "\")'><div class='graycov'></div></div><p>" + song.title + " by " + song.artist + "</p><div class='iconCnt' onclick='undoPick(\"" + song.youtubeId + "\")'><i class='fa fa-check' aria-hidden='true'></i></div></div>";
       }
@@ -71,6 +70,11 @@ function renderSongs( ) {
     elem.style.webkitBoxShadow = "inset 0px -50px 25px -28px rgba(0,0,0,0.90)";
     elem.style.mozBoxShadow = "inset 0px -50px 25px -28px rgba(0,0,0,0.90)";
     elem.style.boxShadow = "inset 0px -50px 25px -28px rgba(0,0,0,0.90)";
+  }
+  else {
+    elem.style.webkitBoxShadow = "0";
+    elem.style.mozBoxShadow = "0";
+    elem.style.boxShadow = "0";
   }
 }
 
@@ -112,3 +116,8 @@ socket.on("Voted", function(data){
   myProfile = data;
   renderSongs();
 });
+
+function mySongs(){
+  document.getElementById("songsWrapper").innerHTML = "<div class='loader'>"
+  socket.emit("GetLiked", localStorage.getItem("key"));
+}
