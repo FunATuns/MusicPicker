@@ -57,6 +57,34 @@ MongoClient.connect(url, function(err, db) {
 io.on('connection', function(socket) {
   console.log('User Connected');
   // when the client emits 'add user', this listens and executes
+  socket.on('GetUnapproved', function(data) {  
+    LoginDB.find({approved: false} ).toArray().then(function(accounts) {
+      socket.emit("Gotem", accounts);
+    });
+  });
+
+  socket.on('Approve', function(key) {  
+    console.log(key); 
+    LoginDB.findOne({key: key}).then(function (profile) { 
+      profile.approved = true;
+      LoginDB.update({key:profile.key},profile);
+      LoginDB.find({approved: false} ).toArray().then(function(accounts) {
+        socket.emit("Gotem", accounts);
+      });
+    });
+  });
+
+  socket.on('Disapprove', function(keyss) { 
+    console.log(keyss); 
+    LoginDB.findOne({key: keyss}).then(function (profile) { 
+      console.log(profile);
+      LoginDB.remove({key:keyss});
+      LoginDB.find({approved: false} ).toArray().then(function(accounts) {
+        socket.emit("Gotem", accounts);
+      });
+    });
+  });
+
   socket.on('GetLiked', function(key) {  
     LoginDB.findOne({key: key}).then(function (profile) { 
       if(profile == null) {

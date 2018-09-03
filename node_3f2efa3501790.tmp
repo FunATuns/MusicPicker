@@ -64,24 +64,18 @@ io.on('connection', function(socket) {
   });
 
   socket.on('Approve', function(key) {  
-    console.log(key); 
     LoginDB.findOne({key: key}).then(function (profile) { 
       profile.approved = true;
       LoginDB.update({key:profile.key},profile);
-      LoginDB.find({approved: false} ).toArray().then(function(accounts) {
-        socket.emit("Gotem", accounts);
-      });
+      socket.emit("Error", "approved mr big guy");
+      socket.emit("Gotem", accounts);
     });
   });
 
-  socket.on('Disapprove', function(keyss) { 
-    console.log(keyss); 
-    LoginDB.findOne({key: keyss}).then(function (profile) { 
-      console.log(profile);
-      LoginDB.remove({key:keyss});
-      LoginDB.find({approved: false} ).toArray().then(function(accounts) {
-        socket.emit("Gotem", accounts);
-      });
+  socket.on('Disapprove', function(key) {  
+    LoginDB.findOne({key: key}).then(function (profile) { 
+      LoginDB.remove({key:profile.key});
+      socket.emit("Gotem", accounts);
     });
   });
 
