@@ -57,25 +57,41 @@ MongoClient.connect(url, function(err, db) {
 io.on('connection', function(socket) {
   console.log('User Connected');
   // when the client emits 'add user', this listens and executes
+  socket.on('GetLiked', function(key) {  
+    LoginDB.findOne({key: key}).then(function (profile) { 
+      if(profile == null) {
+        socket.emit("Redirect", "landing.html","Woah there, you need to login again (not your fault payton made a bad app)");
+        return;
+      }
+      console.log("Fetching liked for " + profile.name);
+      getNextSong(0,profile.pickedsongs,[],socket, profile);
+
+    });
+  });
+
   socket.on('SearchSongs', function(key,search) { 
     LoginDB.findOne({key: key}).then(function (profile) { 
       if(profile == null) {
         socket.emit("Redirect", "landing.html","Woah there, you need to login again (not your fault payton made a bad app)");
       }
 
+      console.log(profile.username + " searched '" + search + "'");
+
       songSearch.search({
         search: search,
-        limit: 10, // defaults to 50
+        limit: 11, // defaults to 50
         itunesCountry: 'us', // defaults to 'us'
         youtubeAPIKey: config.youtubeApi,
       }, function(err, songs) {
-        for(var i in songs) {
-          checkSong(songs[i]);
+        if(songs) {
+          console.log(songs.length + " songs have been retrieved");
+          for(var i in songs) {
+            checkSong(songs[i]);
+          }
+          socket.emit("ProfileData",profile);
+          socket.emit("SongSearch", songs);
         }
-        socket.emit("ProfileData",profile);
-        socket.emit("SongSearch", songs);
       });
-
     });
   });
 
@@ -109,6 +125,7 @@ io.on('connection', function(socket) {
           console.log(profile.name + " voted for " + song.title );
           SongDB.update({youtubeId:song.youtubeId},song);
           LoginDB.update({key:profile.key},profile);
+          socket.emit("Voted",profile);
         }
 
       });
@@ -153,9 +170,10 @@ io.on('connection', function(socket) {
               } 
             }
           }
-          console.log(profile.name + " unvoted for " + song.title );
+          console.log(profile.name + " unvoted " + song.title );
           SongDB.update({youtubeId:song.youtubeId},song);
           LoginDB.update({key:profile.key},profile);
+          socket.emit("Voted",profile);
         }
 
       });
@@ -229,58 +247,12 @@ io.on('connection', function(socket) {
     });
   });
 
-  
-
   socket.on('Leaderboard', function(type) { 
     getBoard(type, function (board) {
       socket.emit("Leaderboard", board);
     });
   });
 
-  socket.on('Profile', function(data) {
-    LoginDB.findOne({key:data.key}).then(function(profile) {
-      if(profile == null) {
-        socket.emit("Profile", {
-          status: "fail",
-          type: "invalidKey",
-          profile: {}
-        });
-        console.log("Profile Fail: invalidKey");
-      }
-      if(data.username == "" || !data.username ) {
-        socket.emit("Profile", {
-          status: "success",
-          type: "",
-          profile: profile
-        });
-        console.log("Profile Success");
-      }
-      else {
-        LoginDB.findOne({username:data.username}).then(function(otherProfile) {
-          if(otherProfile == null) {
-            socket.emit("Profile", {
-              status: "fail",
-              type: "invalidUsername",
-              profile: {}
-            });
-            console.log("Profile Fail: invalidUsername");
-          }
-          else  {
-            otherProfile.key = "";
-            otherProfile.password = "";
-            socket.emit("Profile", {
-              status: "success",
-              type: "",
-              profile: otherProfile
-            });
-            console.log("Profile Success");
-          }
-        });
-      }
-
-
-    });
-  });
 
   socket.on('disconnect', function() {
 
@@ -397,20 +369,37 @@ function getBoard (type,withBoard) {
 }
 
 function checkSong(song) {
-  console.log(song.youtubeId);
-  var songObj = {
-    title: song.title,
-    artist: song.artist,
-    album: song.album,
-    coverUrl: song.coverUrl,
-    youtubeId: song.youtubeId,
-    voteAmount: 0,
-    votes: []
-  };
-  SongDB.findOne({youtubeId:song.youtubeId}).then(function (gnos) { 
-    console.log(gnos);
-    if(gnos == null ) {
-      SongDB.insertOne(songObj);
-    }            
-  });
+  if(song.title && song.artist) {
+    var songObj = {
+      title: song.title,
+      artist: song.artist,
+      album: song.album,
+      coverUrl: song.coverUrl,
+      youtubeId: song.youtubeId,
+      voteAmount: 0,
+      votes: []
+    };
+    SongDB.findOne({youtubeId:song.youtubeId}).then(function (gnos) { 
+      if(gnos == null ) {
+        SongDB.insertOne(songObj);
+      }            
+    });
+  }
+}
+
+function getNextSong(index,list,sendArray,socket,profile) {
+  console.log(list);
+    if(index == list.length) {
+      console.log("sent");
+      socket.emit("ProfileData",profile);
+      socket.emit("SongSearch",sendArray);
+    }
+    else {
+      SongDB.findOne({youtubeId:list[index]}).then(function(song) {
+        console.log(song.title);
+        sendArray.push(song);
+        index += 1;
+        getNextSong(index, list, sendArray, socket,profile);
+      });
+    }
 }
