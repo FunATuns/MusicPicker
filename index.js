@@ -16,7 +16,7 @@ var formidable = require('express-formidable');
 
 var songSearch = require('song-search');
  
-
+logger("Test");
 
 var dbready = false;
 var LoginDB = null;
@@ -55,7 +55,6 @@ MongoClient.connect(url, function(err, db) {
 
 
 io.on('connection', function(socket) {
-  console.log('User Connected');
   // when the client emits 'add user', this listens and executes
   socket.on('GetUnapproved', function(data) {  
     LoginDB.find({approved: false} ).toArray().then(function(accounts) {
@@ -64,10 +63,10 @@ io.on('connection', function(socket) {
   });
 
   socket.on('Approve', function(key) {  
-    console.log(key); 
     LoginDB.findOne({key: key}).then(function (profile) { 
       profile.approved = true;
       LoginDB.update({key:profile.key},profile);
+      logger(profile.name + " just got approved");
       LoginDB.find({approved: false} ).toArray().then(function(accounts) {
         socket.emit("Gotem", accounts);
       });
@@ -75,9 +74,8 @@ io.on('connection', function(socket) {
   });
 
   socket.on('Disapprove', function(keyss) { 
-    console.log(keyss); 
     LoginDB.findOne({key: keyss}).then(function (profile) { 
-      console.log(profile);
+      logger(profile.name + " just got disapproved");
       LoginDB.remove({key:keyss});
       LoginDB.find({approved: false} ).toArray().then(function(accounts) {
         socket.emit("Gotem", accounts);
@@ -91,7 +89,7 @@ io.on('connection', function(socket) {
         socket.emit("Redirect", "landing.html","Woah there, you need to login again (not your fault payton made a bad app)");
         return;
       }
-      console.log("Fetching liked for " + profile.name);
+      logger("Fetching liked songs for " + profile.name);
       getNextSong(0,profile.pickedsongs,[],socket, profile);
 
     });
@@ -103,7 +101,7 @@ io.on('connection', function(socket) {
         socket.emit("Redirect", "landing.html","Woah there, you need to login again (not your fault payton made a bad app)");
       }
 
-      console.log(profile.username + " searched '" + search + "'");
+      logger(profile.username + " searched '" + search + "'");
 
       songSearch.search({
         search: search,
@@ -112,7 +110,7 @@ io.on('connection', function(socket) {
         youtubeAPIKey: config.youtubeApi,
       }, function(err, songs) {
         if(songs) {
-          console.log(songs.length + " songs have been retrieved");
+          logger(songs.length + " songs have been retrieved");
           for(var i in songs) {
             checkSong(songs[i]);
           }
@@ -150,19 +148,15 @@ io.on('connection', function(socket) {
             song.voteAmount = song.votes.length;
           }
 
-          console.log(profile.name + " voted for " + song.title );
+          logger(profile.name + " voted for " + song.title );
           SongDB.update({youtubeId:song.youtubeId},song);
           LoginDB.update({key:profile.key},profile);
           socket.emit("Voted",profile);
         }
-
       });
-
-  
     });
   });
 
-  
   socket.on('UnVote', function(key, songID) {
     LoginDB.findOne({key: key}).then(function (profile) { 
       if(profile == null) {
@@ -198,7 +192,7 @@ io.on('connection', function(socket) {
               } 
             }
           }
-          console.log(profile.name + " unvoted " + song.title );
+          logger(profile.name + " unvoted " + song.title );
           SongDB.update({youtubeId:song.youtubeId},song);
           LoginDB.update({key:profile.key},profile);
           socket.emit("Voted",profile);
@@ -216,7 +210,7 @@ io.on('connection', function(socket) {
     LoginDB.findOne({username: data.username}).then(function (testProfile) { // get profile with username
       if(testProfile != null) { // does such profile exist?
         socket.emit("Error", "Username is not unique, please pick another username or check if you already have an account."); // if yes emit a fail with non unique username
-        console.log("Register Fail: usernameNotUnique");
+        logger("Register fail. Username not unique");
       }
       else if (!hasWhiteSpace(data.username) && data.username.length < 15) { // if no check some parameters
         var profile = { // make account
@@ -233,17 +227,17 @@ io.on('connection', function(socket) {
 
         LoginDB.insertOne(profile).then(function(item) { // push account
           socket.emit("Redirect", "landing.html","You have successfully registered! Your account is not approved yet, but Payton will approve it next time he has a chance (feel free to bug him). Once your account is approved you can login to the site and start picking music! Thanks for registering!"); // emit success
-          console.log("Register Success");
+          logger(item.name + " has registered successfully");
         });
       } 
       else {
         if(hasWhiteSpace(data.username)) { // deal with problem
           socket.emit("Error", "Username has whitespace, please remove the spaces/enters in your username.");
-          console.log("Register Fail: hasWhiteSpace");
+          logger("Register fail. Username has whitespace");
         }
         else if (data.username.length >= 15) {
           socket.emit("Error", "Your username too long boi.");
-          console.log("Register Fail: tooLong");
+          logger("Register fail. Username too long");
         }
       }
     });
@@ -253,14 +247,14 @@ io.on('connection', function(socket) {
     LoginDB.findOne({username:data.username}).then(function(profile) {
       if(profile == null) {
         socket.emit("Error", "Incorrect username.");
-        console.log("Login Fail: accountDoesntExist");
+        logger("Login fail. Wrong username");
       }
       else {
         if (data.password == profile.password) {
           if(profile.approved) {
             socket.emit("Key",profile.key);
             socket.emit("Redirect", "main.html","Login successful! To vote for a song click the big green 'Vote' button next to it! The top most voted songs will be submitted to the DJ at homecoming. Happy voting!"); // emit success
-            console.log("Login Success");
+            logger(profile.name + " logged in successfully");
           }
           else {
             socket.emit("Error", "Your account is not approved, wait until Payton approves your account for music selection. You can bug them if you want!");
@@ -269,7 +263,7 @@ io.on('connection', function(socket) {
         } 
         else {
           socket.emit("Error", "Incorrect password.");
-          console.log("Login Fail: wrongPassword");
+          logger("Login fail. Wrong password");
         }
       }
     });
@@ -314,7 +308,7 @@ function keyGen() {
   }
 
   key +=  String(Date.now());
-  console.log(key);
+  logger("Key generated: " + key);
   return key;
 }
 
@@ -416,18 +410,30 @@ function checkSong(song) {
 }
 
 function getNextSong(index,list,sendArray,socket,profile) {
-  console.log(list);
     if(index == list.length) {
-      console.log("sent");
       socket.emit("ProfileData",profile);
       socket.emit("SongSearch",sendArray);
     }
     else {
       SongDB.findOne({youtubeId:list[index]}).then(function(song) {
-        console.log(song.title);
         sendArray.push(song);
         index += 1;
         getNextSong(index, list, sendArray, socket,profile);
       });
     }
+}
+
+function logger (message) {
+  var d = new Date();
+  var h = addZero(d.getHours());
+  var m = addZero(d.getMinutes());
+  console.log("[" + h + ":" + m + "] " + message);
+}
+
+
+function addZero(i) {
+  if (i < 10) {
+    i = "0" + i;
+  }
+  return i;
 }
