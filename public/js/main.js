@@ -1,4 +1,8 @@
-var ip = "http://68.234.71.226:7777";
+var ip = "141.126.155.58:7778";
+/*
+  Payton's PC [Dev] :: 141.126.155.58:7777
+  Production Server [Live] :: 141.126.155.58:7778
+*/
 var socket = io.connect(ip); // take your ip out for saftey when pushing
 var pointss;
 var myProfile = {};
@@ -123,7 +127,7 @@ function undoPick(songID){
 
 socket.on("Voted", function(data){
   myProfile = data;
-  //renderSongs();
+  renderSongs();
 });
 
 function mySongs(){

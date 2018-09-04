@@ -1,7 +1,7 @@
 // Setup basic express servernpm install
-var live = true;
+var debug = true;
 
-var port = live ? 7778 : 777;
+var port = debug ? 7777 : 27016;
 
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -42,9 +42,8 @@ var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/musicpicker';
 // Use connect method to connect to the Server 
 
-MongoClient.connect(url, function(err, client) {
+MongoClient.connect(url, function(err, db) {
   if (err == null) {
-    var db = client.db('musicpicker');
     console.log("Connected correctly to server");
     LoginDB = db.collection('users');
     SongDB = db.collection('songs');
@@ -66,7 +65,7 @@ io.on('connection', function(socket) {
   socket.on('Approve', function(key) {  
     LoginDB.findOne({key: key}).then(function (profile) { 
       profile.approved = true;
-      LoginDB.replaceOne({key:profile.key},profile);
+      LoginDB.update({key:profile.key},profile);
       logger(profile.name + " just got approved");
       LoginDB.find({approved: false} ).toArray().then(function(accounts) {
         socket.emit("Gotem", accounts);
@@ -150,8 +149,8 @@ io.on('connection', function(socket) {
           }
 
           logger(profile.name + " voted for " + song.title );
-          SongDB.replaceOne({youtubeId:song.youtubeId},song);
-          LoginDB.replaceOne({key:profile.key},profile);
+          SongDB.update({youtubeId:song.youtubeId},song);
+          LoginDB.update({key:profile.key},profile);
           socket.emit("Voted",profile);
         }
       });
@@ -194,8 +193,8 @@ io.on('connection', function(socket) {
             }
           }
           logger(profile.name + " unvoted " + song.title );
-          SongDB.replaceOne({youtubeId:song.youtubeId},song);
-          LoginDB.replaceOne({key:profile.key},profile);
+          SongDB.update({youtubeId:song.youtubeId},song);
+          LoginDB.update({key:profile.key},profile);
           socket.emit("Voted",profile);
         }
 
