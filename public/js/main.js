@@ -1,4 +1,4 @@
-var ip = "141.126.155.58:7778";
+var ip = "141.126.155.58:7777";
 /*
   Payton's PC [Dev] :: 141.126.155.58:7777
   Production Server [Live] :: 141.126.155.58:7778
@@ -133,6 +133,16 @@ socket.on("Voted", function(data){
 function mySongs(){
   document.getElementById("songsWrapper").innerHTML = "<div class='loader'></div>"
   socket.emit("GetLiked", localStorage.getItem("key"));
+}
+
+function recentSongs(){
+  document.getElementById("songsWrapper").innerHTML = "<div class='loader'></div>"
+  socket.emit("GetRecent", localStorage.getItem("key"));
+}
+
+function topSongs(){
+  document.getElementById("songsWrapper").innerHTML = "<div class='loader'></div>"
+  socket.emit("GetTop", localStorage.getItem("key"));
 }
 
 function logAd(){

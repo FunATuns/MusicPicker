@@ -145,7 +145,7 @@ input::placeholder {
   color: #b6b6b6;
 }
 
-#regButton, #logButton, #songSearchButton, #mySongsBtn, #logadbtn, #getUnapproved {
+#regButton, #logButton, #songSearchButton, #mySongsBtn, #topSongsBtn, #recentSongsBtn, #logadbtn, #getUnapproved {
   background-color: #283044;
   padding: 30px 60px;
   color: white;

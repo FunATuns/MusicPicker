@@ -1,5 +1,5 @@
 // Setup basic express servernpm install
-var live = true;
+var live = false;
 
 var port = live ? 7778 : 7777;
 
