@@ -1,7 +1,7 @@
 // Setup basic express servernpm install
-var live = true;
+var live = false;
 
-var port = live ? 7778 : 7777;
+var port = "7777";//live ? 7778 : 7777;
 
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -13,9 +13,13 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var fs = require('fs');
 var formidable = require('express-formidable');
-
+var request = require('request');
 var songSearch = require('song-search');
- 
+var youtubeAPIKey = "";
+request('http://localhost:80/youtubeapi.json', function (error, response, body) {
+  youtubeAPIKey = body;
+});
+
 logger("Test");
 
 var dbready = false;
@@ -54,7 +58,6 @@ MongoClient.connect(url, function(err, client) {
 });
 
 var recentSongs = [];
-
 
 
 io.on('connection', function(socket) {
@@ -141,16 +144,15 @@ io.on('connection', function(socket) {
   socket.on('SearchSongs', function(key,search) { 
     LoginDB.findOne({key: key}).then(function (profile) { 
       if(profile == null) {
+        console.log("search song");
         socket.emit("Redirect", "landing.html","Woah there, you need to login again (not your fault payton made a bad app)");
       }
-
       logger(profile.username + " searched '" + search + "'");
-
       songSearch.search({
         search: search,
         limit: 11, // defaults to 50
         itunesCountry: 'us', // defaults to 'us'
-        youtubeAPIKey: config.youtubeApi,
+        youtubeAPIKey: youtubeAPIKey,
       }, function(err, songs) {
         if(songs) {
           logger(songs.length + " songs have been retrieved");

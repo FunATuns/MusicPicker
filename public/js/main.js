@@ -1,4 +1,4 @@
-var ip = "141.126.155.58:7777";
+var ip = "http://localhost:7777";
 /*
   Payton's PC [Dev] :: 141.126.155.58:7777
   Production Server [Live] :: 141.126.155.58:7778
@@ -22,6 +22,8 @@ if (ua.indexOf('safari') != -1) {
     }
   }
 }
+
+socket.emit("IsConnect", true);
 
 
 $("#registerPick").click(function (e) {
@@ -49,12 +51,14 @@ socket.on("Key",function (data) {
 
 socket.on("ProfileData",function (data) {
   myProfile = data;
+  console.log("lmao");
 });
 
 socket.on("SongSearch",function (data) {
   songsToLoad = data;
   console.log(data);
   renderSongs();
+  console.log("lmao1");
 });
 
 function renderSongs( ) {
